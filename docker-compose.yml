@@ -1,0 +1,36 @@
+services:
+  db:
+    image: mysql:8.0  # Utiliza la imagen oficial de MySQL
+    restart: always
+    environment:
+      MYSQL_DATABASE: mydb  # Nombre de la base de datos
+      MYSQL_ROOT_PASSWORD: example  # Contraseña para el usuario root
+      # No uses MYSQL_USER y MYSQL_PASSWORD para root
+    ports:
+      - '3306:3306'  # Expone el puerto 3306
+    volumes:
+      - db_data:/var/lib/mysql  # Persistencia de datos
+
+  backend:
+    build:
+      context: ./backend  # Contexto del Dockerfile del backend
+    restart: always
+    ports:
+      - '3000:3000'  # Expone el puerto 3000 para el backend
+    environment:
+      DB_USER: root
+      DB_PASSWORD: example
+      DB_NAME: mydb
+      DB_HOST: db  # Este es el nombre del servicio de la base de datos
+    depends_on:
+      - db  # Asegura que el contenedor de la base de datos esté levantado primero
+
+  frontend:
+    build:
+      context: ./frontend  # Contexto del Dockerfile del frontend
+    restart: always
+    ports:
+      - '5173:5173'  # Expone el puerto 5173 para el frontend (Vite por defecto)
+
+volumes:
+  db_data:
